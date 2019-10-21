@@ -9,26 +9,27 @@
     </h:head>
     <h:body>
         <h:form>
-            <p:panelGrid columns="2">            
+            <p:panelGrid id="grid" columns="3">            
                 <h:outputLabel for="nombre" value="Nombre:" style="font-weight:bold" />
                 <p:inputText id="name" value="#{carros.nombre}"  required="true" label="Obligatorio"/>
-                      
+                    <p:message for="name" display="text"/>   
                 <h:outputLabel for="Marca" value="Marca: " style="font-weight:bold" />
                 <p:selectOneMenu id="console" value="#{carros.marca}" style="width:125px">
-                    <f:selectItem itemLabel="Seleccione.." itemValue="#{null}"/>
+                    <f:selectItem itemLabel="Seleccione.." itemValue="Seleccione...." noSelectionOption="true"/>
                     <f:selectItems value="#{carros.listamarca}" />
                 </p:selectOneMenu>
-
+                    <p:message for="console" display="text"/>   
+                
                  <h:outputLabel for="modelo" value="Modelo:" style="font-weight:bold" />
                  <p:calendar id="año" value="#{carros.modelo}" pattern="yyyy" yearRange="1800:2020" effect="slideDown"  
                              navigator="true"  alt="año" />
+                 <p:message for="año" display="text"/>   
                  
-
-                 <p:commandButton value="Agregar" id="ajax"  update="tabla"  action="#{carros.llenarLista()}" style="margin-right:20px;" styleClass="ui-priority-primary" />
+                 <p:commandButton value="Agregar" id="ajax"  update="tabla grid panel"  action="#{carros.llenarLista()}" style="margin-right:20px;" styleClass="ui-priority-primary" />
                 
-               
-                 
-                 <p:dataTable id= "tabla" var="car"  value="#{carros.carro}"  rows="10" widgetVar="tablaCarros"
+            </p:panelGrid>
+            <p:panel id="panel">
+                <p:dataTable id= "tabla" var="car"  value="#{carros.carro}" rendered="#{carros.carro.size()>0 eq true}" rows="10" widgetVar="tablaCarros"
                  paginator="true"
                  paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
                  rowsPerPageTemplate="5,10,15">                  
@@ -52,7 +53,7 @@
                     <h:outputText value="#{car.modelo}" />
                 </p:column>
                </p:dataTable>
-            </p:panelGrid>
+            </p:panel>     
         </h:form>
     </h:body>
 </html>

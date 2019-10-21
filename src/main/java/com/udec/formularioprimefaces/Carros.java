@@ -29,7 +29,7 @@ public class Carros implements Serializable{
      */
     @NotNull
     private String nombre;
-    @Size(min=1,max=5)
+    @Size(min=1,max=8)
     private String marca;
     @Min(1800)
     @Max(2050)
