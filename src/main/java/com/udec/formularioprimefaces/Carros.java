@@ -157,7 +157,7 @@ public class Carros implements Serializable{
        public void onRowEdit(RowEditEvent event) {
         FacesMessage msg = new FacesMessage("Carro Editado", ((Carros) event.getObject()).getNombre());
         FacesContext.getCurrentInstance().addMessage(null, msg);
-        Logger.getLogger("logger").log(Level.INFO, "Se Activo la Edicion Del carro ");
+        Logger.getLogger("logger").log(Level.INFO, "Se Edito el Carro: " + getNombre());
     }
      /**
       * metodo para cancelar la edicion
@@ -180,7 +180,7 @@ public class Carros implements Serializable{
             FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Editado", "Old: " + oldValue + ", New:" + newValue);
             FacesContext.getCurrentInstance().addMessage(null, msg);
         }
-           Logger.getLogger("Logger").log(Level.INFO, "Se Edito El carro ");
+           Logger.getLogger("Logger").log(Level.INFO, "Se Activo La Edicion");
     }
      /**
       * metodo para eliminar un carro de la lista
