@@ -5,16 +5,24 @@
  */
 package com.udec.formularioprimefaces;
 
+import com.udec.formularioprimefaces.modelo.Carro;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.scene.control.TableColumn.CellEditEvent;
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.inject.Named;
 import javax.faces.view.ViewScoped;
+
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import org.primefaces.event.RowEditEvent;
 
 /**
  *
@@ -34,11 +42,16 @@ public class Carros implements Serializable{
     @Min(1800)
     @Max(2050)
     private int modelo;
+    private boolean seleccionar;
+    
+    //private Carro car;
     private List<Carros> carro;
     private List<String> listamarca;
+    private List<Carros> eliminados;
     
     public Carros() {
        carro = new ArrayList<>();
+       eliminados = new ArrayList<>();
     }
 /**
  * costructor de la calse que inicializa las variables
@@ -65,11 +78,10 @@ public class Carros implements Serializable{
         //listamarca.add("Ford");
                 
     }
-
-/**
- * getters y setters de las variables
- * @return 
- */
+    /**
+     * getters y setters de las variables
+     * @return
+     */
     public String getNombre() {
         return nombre;
     }
@@ -101,6 +113,7 @@ public class Carros implements Serializable{
     public void setCarro(List<Carros> carro) {
         this.carro = carro;
     }
+    
 
     public List<String> getListamarca() {
         return listamarca;
@@ -108,7 +121,24 @@ public class Carros implements Serializable{
 
     public void setListamarca(List<String> listamarca) {
         this.listamarca = listamarca;
+    }   
+    
+//    public Carro getCar() {
+//        return car;
+//    }
+//
+//    public void setCar(Carro car) {
+//        this.car = car;
+//    }
+
+    public boolean isSeleccionar() {
+        return seleccionar;
     }
+
+    public void setSeleccionar(boolean seleccionar) {
+        this.seleccionar = seleccionar;
+    }
+    
 
    /**
     * funcion para almacenar objetos en la lista 
@@ -116,5 +146,61 @@ public class Carros implements Serializable{
     public void llenarLista(){
       Carros car = new Carros(nombre, marca, modelo);
       carro.add(car);
+      Logger.getLogger(Carros.class.getName()).log(Level.INFO, "Se Ha Agregado un Carro a la Lista ");
     }
+    
+    /**
+     * metodo para editar un carro
+     * @param event 
+     */
+    
+       public void onRowEdit(RowEditEvent event) {
+        FacesMessage msg = new FacesMessage("Carro Editado", ((Carros) event.getObject()).getNombre());
+        FacesContext.getCurrentInstance().addMessage(null, msg);
+        Logger.getLogger("logger").log(Level.INFO, "Se Activo la Edicion Del carro ");
+    }
+     /**
+      * metodo para cancelar la edicion
+      * @param event 
+      */
+    public void onRowCancel(RowEditEvent event) {
+        FacesMessage msg = new FacesMessage("Edicion Cancelada", ((Carros) event.getObject()).getNombre());
+        FacesContext.getCurrentInstance().addMessage(null, msg);
+        Logger.getLogger(Carros.class.getName()).log(Level.INFO, "Se Cancelo la Edicion");
+    }
+    /**
+     * metodo para cambiar el antiguo valor por el nuevo
+     * @param event 
+     */
+     public void onCellEdit(CellEditEvent event) {
+        Object oldValue = event.getOldValue();
+        Object newValue = event.getNewValue();
+         
+        if(newValue != null && !newValue.equals(oldValue)) {
+            FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Editado", "Old: " + oldValue + ", New:" + newValue);
+            FacesContext.getCurrentInstance().addMessage(null, msg);
+        }
+           Logger.getLogger("Logger").log(Level.INFO, "Se Edito El carro ");
+    }
+     /**
+      * metodo para eliminar un carro de la lista
+      * @return 
+      */
+     public String eliminar(){
+         for(Carros c : carro){
+          if(c.isSeleccionar()){
+            eliminados.add(c);
+           Logger.getLogger(Carros.class.getName()).log(Level.INFO, "Se Elimino: " +"Nombre: "+ c.getNombre()+" "+"Marca: " +c.getMarca());
+          }
+         
+        }
+      if(!eliminados.isEmpty()){
+              carro.removeAll(eliminados);
+              FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Eliminado con Exito!"));
+          } 
+        
+         
+         return "carros";     
+     }
+
 }

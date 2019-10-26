@@ -8,52 +8,91 @@
         <title>Carros</title>
     </h:head>
     <h:body>
-        <h:form>
-            <p:panelGrid id="grid" columns="3">            
-                <h:outputLabel for="nombre" value="Nombre:" style="font-weight:bold" />
+        <h:form id="form">
+          <p:growl id="msgs" showDetail="true"/>   
+          <p:panelGrid id="grid" columns="3" style="bottom: ">            
+                <h:outputLabel for="nombre" value="#{msg.etiqueta_nombre}" style="font-weight:bold" />
                 <p:inputText id="name" value="#{carros.nombre}"  required="true" label="Obligatorio"/>
                     <p:message for="name" display="text"/>   
-                <h:outputLabel for="Marca" value="Marca: " style="font-weight:bold" />
+                    <h:outputLabel for="marca" value="#{msg.etiqueta_marca} " style="font-weight:bold" />
                 <p:selectOneMenu id="console" value="#{carros.marca}" style="width:125px">
                     <f:selectItem itemLabel="Seleccione.." itemValue="Seleccione...." noSelectionOption="true"/>
                     <f:selectItems value="#{carros.listamarca}" />
                 </p:selectOneMenu>
                     <p:message for="console" display="text"/>   
                 
-                 <h:outputLabel for="modelo" value="Modelo:" style="font-weight:bold" />
-                 <p:calendar id="año" value="#{carros.modelo}" pattern="yyyy" yearRange="1800:2020" effect="slideDown"  
-                             navigator="true"  alt="año" />
+                    <h:outputLabel for="modelo" value="#{msg.etiqueta_modelo}" style="font-weight:bold" />
+                 <p:calendar id="año" value="#{carros.modelo}" pattern="yyyy" yearRange="1900:2020" effect="slideDown"  
+                             required="true" label="obligatorio" navigator="true"  alt="año" />
                  <p:message for="año" display="text"/>   
-                 
-                 <p:commandButton value="Agregar" id="ajax"  update="tabla grid panel"  action="#{carros.llenarLista()}" style="margin-right:20px;" styleClass="ui-priority-primary" />
-                
+                                       
+                 <p:commandButton value="#{msg.etiqueta_boton}" id="ajax"  update="tabla grid panel"  action="#{carros.llenarLista()}" style="margin-right:20px;" styleClass="ui-priority-primary" />
+    
             </p:panelGrid>
-            <p:panel id="panel">
+          <p:panel id="panel">
+              
                 <p:dataTable id= "tabla" var="car"  value="#{carros.carro}" rendered="#{carros.carro.size()>0 eq true}" rows="10" widgetVar="tablaCarros"
-                 paginator="true"
+                    editable="true"
+                    paginator="true"
                  paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
                  rowsPerPageTemplate="5,10,15">                  
                      
+            <p:ajax event="rowEdit" listener="#{carros.onRowEdit}" update=":form:msgs" />
+            <p:ajax event="rowEditCancel" listener="#{carros.onRowCancel}" update=":form:msgs" />
+ 
+            <p:column id="nombre" headerText="#{msg.etiqueta_nombre}" filterBy="#{car.nombre}" footerText="contains" filterMatchMode="contains">
+                            <p:cellEditor>
+                               <f:facet name="output"> <h:outputText value="#{car.nombre}" /></f:facet>
+                               <f:facet name="input"><p:inputText id="modelInput" value="#{car.nombre}" style="width:100%"/></f:facet>
+                            </p:cellEditor>                       
+            </p:column>
             
-                     <p:column id="nombre" headerText="Nombre" filterBy="#{car.nombre}" footerText="contains" filterMatchMode="contains">
-                        <h:outputText value="#{car.nombre}" />
-                     </p:column>
+            
+            <p:column id="marca" headerText="#{msg.etiqueta_marca}" filterBy="#{car.marca}" footerText="exact" filterMatchMode="exact">
+                               
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('tablaCarros').filter()" styleClass="custom-filter">
+                                <f:selectItem itemLabel="Seleccione..." itemValue="#{null}" noSelectionOption="true" />
+                                <f:selectItems value="#{carros.listamarca}" />
+                            </p:selectOneMenu>
+                        </f:facet>
+                      <p:cellEditor>
+                        <f:facet name="output"><h:outputText value="#{car.marca}" /></f:facet>
+                        <f:facet name="input">
+                        <h:selectOneMenu value="#{car.marca}" style="width:100%">
+                            <f:selectItems value="#{carros.listamarca}" var="man" itemLabel="#{man}" itemValue="#{man}" />
+                        </h:selectOneMenu>
+                        </f:facet>
+                      </p:cellEditor>
+                
+                    </p:column>
 
-                     <p:column id="marca" headerText="Marca" filterBy="#{car.marca}" footerText="exact" filterMatchMode="exact">
-                     <f:facet name="filter">
-                        <p:selectOneMenu onchange="PF('tablaCarros').filter()" styleClass="custom-filter">
-                            <f:selectItem itemLabel="Seleccione..." itemValue="#{null}" noSelectionOption="true" />
-                            <f:selectItems value="#{carros.listamarca}" />
-                        </p:selectOneMenu>
-                     </f:facet>
-                    <h:outputText value="#{car.marca}" />
+            <p:column id="modelo" headerText="#{msg.etiqueta_modelo}" filterBy="#{car.modelo}" filterMatchMode="exact">
+                        <p:cellEditor>
+                            <f:facet name="output"><h:outputText value="#{car.modelo}" /></f:facet>
+                            <f:facet name="input"><p:inputText value="#{car.modelo}" style="width:100%" label="Year"/></f:facet>
+                        </p:cellEditor>
+                    </p:column>
+            
+                <p:column style="width:35px">
+                    <p:rowEditor />                   
                 </p:column>
-
-                     <p:column id="modelo" headerText="Modelo" filterBy="#{car.modelo}" filterMatchMode="exact">
-                    <h:outputText value="#{car.modelo}" />
+                <p:column style="width:35px">
+                    <p:selectBooleanCheckbox value="#{car.seleccionar}">
+                        
+                    </p:selectBooleanCheckbox>                   
                 </p:column>
                </p:dataTable>
-            </p:panel>     
+              <p:commandButton value="#{msg.etiqueta_btneliminar}" actionListener="#{carros.eliminar}"
+                               update="panel form" icon="ui-icon-trash" rendered="#{carros.carro.size()>0 eq true}">
+                  <p:confirm message= "¿Seguro desea Eliminar?" header="Aviso" icon="ui-icon-alert"/>
+              </p:commandButton>
+              <p:confirmDialog global="true">
+                  <p:commandButton value="Si" icon="ui-icon-check" styleClass="ui-confirmdialog-yes"/>
+                  <p:commandButton value="No" icon="ui-icon-close" styleClass="ui-confirmdialog-no"/>
+              </p:confirmDialog>
+              
+            </p:panel>  
         </h:form>
     </h:body>
 </html>
